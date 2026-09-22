@@ -6,8 +6,20 @@ const target = "Sallallahu ala Muhammad"
 recognition.continuous = true;
 recognition.start();
 
-recognition.onresult = (event) =>{
+// function levenshteinDistance (string1 , string2){
+//   return(
+//     console.log(0)
+//   )
+// }
+
+
+
+function App (){
+  const [count, setCount] = useState(0)
+
+  recognition.onresult = (event) =>{
   const transcript = event.results[0][0].transcript
+  console.log("RESULT EVENT FIRED");
   console.log(event.resultIndex)
   console.log(transcript)
   
@@ -17,6 +29,10 @@ recognition.onresult = (event) =>{
   .trim()
   .replace(/\s+/g , " ")
   .replace("salallahu ala mohamad", "sallallahu ala muhammad")
+  .replace("salallahu ala mohamed", "sallallahu ala muhammad")
+  .replace(/salalah wala mohammad|salalah wala mohammed/g , "sallallahu ala muhammad")
+  .replace("salalah allah muhammad", "sallallahu ala muhammad")
+  .replace("sallallahu alaihi mohammed", "sallallahu ala muhammad")
   
   const cleanTarget = target
   .toLowerCase()
@@ -24,14 +40,11 @@ recognition.onresult = (event) =>{
   .trim()
   .replace(/\s+/g , " ")
 
-  if(cleanTranscript === cleanTarget){
+    if(cleanTranscript === cleanTarget){
     setCount(count + 1)
+    }
+
   }
-
-}
-
-function App (){
-  const [count, setCount] = useState(0)
 
   function stopCounter(){
     recognition.stop()
