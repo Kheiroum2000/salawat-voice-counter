@@ -3,7 +3,7 @@ import { useState } from "react";
 const recognition = new webkitSpeechRecognition();
 const target = "Sallallahu ala Muhammad"
 
-recognition.continuous = true;
+recognition.continuous = false;
 recognition.start();
 
 function levenshteinDistance (string1 , string2){
@@ -12,10 +12,12 @@ function levenshteinDistance (string1 , string2){
   const string2Len = string2.length
   const matrix = []
 
-  for(i = 0; i > string1Len; i ++){
+  //Levenshtein Distance
+
+  for(let i = 0; i < string1Len + 1; i ++){
     matrix.push([])
 
-    for(j=0; j < string2Len; j++){
+    for(let j=0; j < string2Len + 1; j++){
       if(i===0){
         matrix[i].push(j);
     
@@ -39,11 +41,12 @@ function levenshteinDistance (string1 , string2){
       }
     }
   }
-
+  
   return(
     matrix[string1Len][string2Len]
   )
 }
+console.log(levenshteinDistance("cat", "cut"));
 
 
 
@@ -72,20 +75,35 @@ function App (){
   .trim()
   .replace(/\s+/g , " ")
 
-    if(cleanTranscript === cleanTarget){
-    setCount(count + 1)
+    const levendist = levenshteinDistance(cleanTranscript, cleanTarget)
+
+    console.log("Distance:", levendist);
+
+    if (levendist <=7){
+      setCount(count + 1)
     }
 
   }
 
-  function stopCounter(){
+  let reco = false
+
+  recognition.onend = () => {
+    if(reco === true){
+
+   } else {
+    recognition.start()
+   }
+  }
+
+  const stopbtn = () => {
+    reco = true
     recognition.stop()
   }
 
   return (
   <>
     <h1>{count}</h1>
-    <button onClick={stopCounter}>Stop</button>  
+    <button onClick={stopbtn}>Stop</button>  
   </>
   ) 
   
