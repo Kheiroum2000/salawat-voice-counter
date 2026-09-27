@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 const recognition = new webkitSpeechRecognition();
 const target = "Sallallahu ala Muhammad"
 
 recognition.continuous = false;
-recognition.start();
+// recognition.start();
 
 function levenshteinDistance (string1 , string2){
 
@@ -52,6 +52,7 @@ console.log(levenshteinDistance("cat", "cut"));
 
 function App (){
   const [count, setCount] = useState(0)
+  const [tar, setTar] = useState(0)
 
   recognition.onresult = (event) =>{
   const transcript = event.results[0][0].transcript
@@ -79,31 +80,89 @@ function App (){
 
     console.log("Distance:", levendist);
 
-    if (levendist <=7){
+    if (levendist <=13 && count < tar){
       setCount(count + 1)
+      console.log("Count setter reached");
+      
     }
 
   }
 
-  let reco = false
+  const ref = useRef(false)
 
+  
   recognition.onend = () => {
-    if(reco === true){
+    console.log("Starting again");
+    console.log("ref at onend:", ref.current);
+    
+    if(ref.current === true){
+      
+    } else if (count < tar){
 
-   } else {
-    recognition.start()
-   }
+      recognition.start()
+
+    }else {
+
+      ref.current = true
+    }
+
   }
+  
+  useEffect(()=>{
+    console.log("count:", count, "tar:", tar);
+
+    if(count === tar){
+      ref.current = true
+
+      console.log("ref after setting true:", ref.current);
+      
+      recognition.stop()
+
+      console.log("Effect working");
+      
+      
+    }
+  }, [count, tar] )
+  
 
   const stopbtn = () => {
-    reco = true
+    ref.current = true
     recognition.stop()
   }
+
+  const startbtn = () => {
+    console.log("Start");
+    ref.current = false
+    recognition.start()
+  }
+
+  const resetbtn = () => {
+    setCount(0)
+  }
+  const resetTarget = () => {
+    setTar(0)
+  }
+
+  const handleChange = (e) => {
+    setTar(e.target.value)
+  }
+
 
   return (
   <>
     <h1>{count}</h1>
-    <button onClick={stopbtn}>Stop</button>  
+
+    <h1>Target: {tar}</h1>
+
+    <button onClick={stopbtn}>Stop</button> 
+
+    <button onClick={startbtn}>Start</button>
+
+    <button onClick={resetbtn}>Reset</button>
+
+    <input name="target" type="number" value={tar} onChange={handleChange} ></input>
+
+    <button onClick={resetTarget}>Reset Target</button> 
   </>
   ) 
   
