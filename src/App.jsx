@@ -1,10 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 
 const recognition = new webkitSpeechRecognition();
-const target = "Sallallahu ala Muhammad"
 
 recognition.continuous = false;
-// recognition.start();
 
 function levenshteinDistance (string1 , string2){
 
@@ -13,30 +11,30 @@ function levenshteinDistance (string1 , string2){
   const matrix = []
 
   //Levenshtein Distance
-
+  
   for(let i = 0; i < string1Len + 1; i ++){
     matrix.push([])
-
+    
     for(let j=0; j < string2Len + 1; j++){
       if(i===0){
         matrix[i].push(j);
-    
+        
       } else if(j===0){
         matrix[i].push(i)
       } else {
         const char1 = string1[i - 1]
         const char2 = string2[j - 1]
-
+        
         if(char1 === char2){
           matrix[i][j] = matrix[i - 1][j - 1];
-
+          
         }else {
           matrix[i][j] =
-            Math.min(
-              matrix[i][j - 1],
-              matrix[i - 1][j],
-              matrix[i - 1][j - 1]
-            ) + 1;
+          Math.min(
+            matrix[i][j - 1],
+            matrix[i - 1][j],
+            matrix[i - 1][j - 1]
+          ) + 1;
         }
       }
     }
@@ -53,7 +51,11 @@ console.log(levenshteinDistance("cat", "cut"));
 function App (){
   const [count, setCount] = useState(0)
   const [tar, setTar] = useState(0)
+  const [counting, setCounting] = useState(false)
+  const [targetText, setTargetText] = useState("")
 
+
+  
   recognition.onresult = (event) =>{
   const transcript = event.results[0][0].transcript
   console.log(event.resultIndex)
@@ -70,7 +72,7 @@ function App (){
   .replace("salalah allah muhammad", "sallallahu ala muhammad")
   .replace("sallallahu alaihi mohammed", "sallallahu ala muhammad")
   
-  const cleanTarget = target
+  const cleanTarget = targetText
   .toLowerCase()
   .replace(/[^\w\s]/g , "")
   .trim()
@@ -96,43 +98,52 @@ function App (){
     console.log("ref at onend:", ref.current);
     
     if(ref.current === true){
+
+      setCounting(false)
       
     } else if (count < tar){
 
       recognition.start()
+      
 
     }else {
+
+      setCounting(false)
 
       ref.current = true
     }
 
   }
   
-  useEffect(()=>{
-    console.log("count:", count, "tar:", tar);
+  // useEffect(()=>{
+  //   console.log("count:", count, "tar:", tar);
 
-    if(count === tar){
-      ref.current = true
+  //   if(count === tar){
+  //     ref.current = true
 
-      console.log("ref after setting true:", ref.current);
-      
-      recognition.stop()
+  //     setCounting(false)
 
-      console.log("Effect working");
+  //     console.log("ref after setting true:", ref.current);
+      
+  //     recognition.stop()
+
+  //     console.log("Effect working");
       
       
-    }
-  }, [count, tar] )
+  //   }
+  // }, [count, tar] )
   
 
   const stopbtn = () => {
     ref.current = true
+    setCounting(false)
     recognition.stop()
   }
 
   const startbtn = () => {
     console.log("Start");
     ref.current = false
+    setCounting(true)
     recognition.start()
   }
 
@@ -144,13 +155,24 @@ function App (){
   }
 
   const handleChange = (e) => {
+
     setTar(e.target.value)
+      
   }
+
+  const handleTargetTextChange = (e) => {
+
+    setTargetText(e.target.value)
+    setCount(0)
+  }
+
 
 
   return (
   <>
-    <h1>{count}</h1>
+    <h1>Current Count: {count}</h1>
+
+    <h2>{counting ? "Status: Counting" : "Status: Stopped"}</h2>
 
     <h1>Target: {tar}</h1>
 
@@ -160,9 +182,10 @@ function App (){
 
     <button onClick={resetbtn}>Reset</button>
 
-    <input name="target" type="number" value={tar} onChange={handleChange} ></input>
+    <input name="target" placeholder="Set Target" type="number" min={1} value={tar} onChange={handleChange} ></input>
 
-    <button onClick={resetTarget}>Reset Target</button> 
+    <button onClick={resetTarget}>Reset Target</button>
+    <input name="target" placeholder="Enter your target text here" type="text" value={targetText} onChange={handleTargetTextChange}></input>
   </>
   ) 
   
